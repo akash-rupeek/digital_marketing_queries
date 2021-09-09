@@ -1,2 +1,2 @@
-# digital_marketing_queries
+# Digital_Marketing_Queries
 Queries used for digital marketing analysis
