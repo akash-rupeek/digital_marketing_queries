@@ -794,11 +794,13 @@ final as
 	,row_numb2
 	,priority
 	,row_numb3
-	from 
+	from
 	(
+	select distinct *, case when lower(utmsource) like ('%app%') then row_number () over ( partition by unbounce_phone,lead_date,lead_type order by priority asc) else 1 end as row_numb3
+	from(
 		select distinct *
-		, row_number() over(partition by unbounce_phone,lead_date,lower(channel)) as row_numb2
-		, case when lower(channel) like ('%app%') then row_number () over ( partition by unbounce_phone,lead_date order by priority asc) else 1 end as row_numb3, 
+		, row_number() over(partition by unbounce_phone,lead_date,lower(channel)) as row_numb2,
+		
 		max((case when cta_id is null or cta_id in ('', '-') THEN -1 ELSE cta_id::bigint END)::float) over(partition by unbounce_phone, lead_date, utmsource) AS max_cta_id
 		from
 			(
@@ -808,6 +810,8 @@ final as
 			   when lower(utmsource) like ('%sms%') then 'sms'
 			   when lower (utmsource) like ('%google%') then 'google'
 			   else lower(utmsource) end as Channel
+			   , case when (lower(utmsource) like '%app%' and lower(utmsource) not like '%fb%') then 'applead' 
+			   else lower(utmsource) end as lead_type
 			from non_ga
 			/*union 
 			select * from webflow_ga 
@@ -815,12 +819,14 @@ final as
 			and conc not in (select distinct conc from non_ga)*/
 		)
 	)
-	where row_numb2 = 1 and row_numb3 = 1 and 
-	lead_date < getdate()::date
+	where row_numb2 = 1
+	)where row_numb3 = 1 and lead_date < getdate()::date
 )
 
-select *--unbounce_phone,lead_date,utmsource,row_numb2,row_numb3,priority
+select distinct *-- unbounce_phone,lead_date,utmsource,row_numb2,row_numb3,priority
 from FINAL
---where lead_date between '2021-07-01' and '2021-07-13'
+--where lead_date between '2021-08-01' and '2021-08-31'
+--and lower(utmsource) like '%app%'
+--and unbounce_phone in ('rrmmojslkm')
 --order by unbounce_phone,lead_date,utmsource
 ;
