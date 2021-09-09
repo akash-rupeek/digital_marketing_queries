@@ -2,7 +2,7 @@ truncate table dm.mapped_leads_test;
 
 insert into dm.mapped_leads_test
 
-with dj_data as 
+with dj_data as
 (
 	select *
 	from
@@ -119,70 +119,135 @@ utm_mapped_leads AS
 
 channel_mapped_leads as
 (
-	select *,
-	case
-		when lower(channel) = 'sem' then bau_sub_buckets
-		when lower(channel) = 'facebook' then channel_group
-		else channel_level_3 end as channel_level_4
+	select 
+	sessionid
+	, name
+	, lead_timestamp
+	, gclid
+	, otp_verified_phone
+	, unbounce_phone
+	, unbounce_phone_decrypted
+	, city
+	, scheme_name
+	, loan_amount
+	, google_coordinates
+	, google_address
+	, building_details
+	, street_name
+	, landmark
+	, loanstartingtime
+	, loanendtime
+	, otp_verified
+	, utmsource
+	, utmmedium
+	, utmcampaign
+	, applicant_name
+	, weight
+	, quality
+	, flag_wt_qa
+	, unbounceurl
+	, email
+	, dm_gold_amount
+	, otp_verified_user
+	, pin_code
+	, existing_loan
+	, cta_id
+	, lead_date
+	, conc
+	, source
+	, max_cta_id
+	, row_numb2
+	, priority
+	, row_numb3
+	, dj_loan_type
+	, is_digital_journey
+	, address_completion
+	, dj_completion
+	, nglr_id
+	, same_day_assign
+	, next_day_assign
+	, assigned
+	, tat
+	, called_lead
+	, campaign_name
+	, campaign_bucket
+	, city_abr
+	, channel_level_2 as channel_group
+	, city_group
+	, channel_level_3 as sem_bau_bucket
+	, type
+	, channel as channel_grouping1
+	, channel_level_4 as bau_sub_buckets
+	, channel_source
 
 	from
+
 	(
 		select *,
-		case 
-			when lower(channel) = 'sem' then sem_bau_bucket
-			when lower(channel) = 'facebook' then channel_source
-			when lower(channel) = 'digital affliate' then
-				case when channel_level_2 = 'Affiliates-ATL' then utmmedium else utmsource end
-			else channel_level_2 end as channel_level_3
+		case
+			when lower(channel) = 'sem' then bau_sub_buckets
+			when lower(channel) = 'facebook' then channel_group
+			else channel_level_3 end as channel_level_4
 
 		from
 		(
 			select *,
-			case
-				when lower(channel) in ('sem', 'youtube', 'discovery', 'gdn') then channel_source
-				when lower(channel) = 'website' then
-					case when lower(utmsource) like '%blog%' or lower(utmsource) like '%static%' then 'Website-SEO' else 'Website-NonSEO' end
-				when lower(channel) = 'google-app' then utmmedium
-				when lower(channel) = 'app_organic' then
-					case when lower(utmsource) like '%experiment%' then 'App-Experiment' else 'App-Regular' end
-				when lower(channel) = 'facebook' then
-					case 
-						when lower(channel_group) like '%atl%' then 'Facebook-ATL'
-						when lower(channel_group) like '%app%' then 'Facebook-App'
-						else 'Facebook-Web' end
+			case 
+				when lower(channel) = 'sem' then sem_bau_bucket
+				when lower(channel) = 'facebook' then channel_source
 				when lower(channel) = 'digital affliate' then
-					case when lower(utmsource) = 'digitalatl' then 'Affiliates-ATL' else 'Affiliates-DM' end
-				else channel end as channel_level_2
+					case when channel_level_2 = 'Affiliates-ATL' then utmmedium else utmsource end
+				else channel_level_2 end as channel_level_3
 
 			from
 			(
 				select *,
 				case
-					when lower(channel_source) like '%discovery%' then 'Discovery'
-					when lower(channel_source) like '%yt%' then 'Youtube'
-					when lower(channel_source) like '%sem%' then 'SEM'
-					when lower(channel_source) like '%gdn%' then 'GDN'
-					when lower(channel_source) like '%facebook%' or lower(channel_source) = 'fb - rq' then 'Facebook'
-					else channel_source end as channel
+					when lower(channel) in ('sem', 'youtube', 'discovery', 'gdn') then channel_source
+					when lower(channel) = 'website' then
+						case when lower(utmsource) like '%blog%' or lower(utmsource) like '%static%' or lower(utmsource) like '%rupeek web%' then 'Website-SEO' else 'Website-NonSEO' end
+					when lower(channel) = 'google-app' then utmmedium
+					when lower(channel) = 'app_organic' then
+						case when lower(utmsource) like '%experiment%' then 'App-Experiment' else 'App-Regular' end
+					when lower(channel) = 'facebook' then
+						case 
+							when lower(channel_group) like '%atl%' then 'Facebook-ATL'
+							when lower(channel_group) like '%app%' then 'Facebook-App'
+							else 'Facebook-Web' end
+					when lower(channel) = 'digital affliate' then
+						case when lower(utmsource) = 'digitalatl' then 'Affiliates-ATL' else 'Affiliates-DM' end
+					else channel end as channel_level_2
 
 				from
 				(
-					select *
-					, case
-						when campaign_bucket is null then
-						case 
-							when lower(trim(utmsource)) in (select distinct affiliate from dm.affiliates_list) then 'Digital Affliate'
-							when lower(utmsource) like '%app_paid%' then 'app_paid'
-							when lower(utmsource) like '%app_unpaid%' then 'app_organic'
-							when lower(utmsource) like '%google%' then 'Google'
-							when lower(utmsource) like '%website%' then 'Website'
-							when lower(utmsource) like '%webite%' then 'Website'
-							when lower(utmsource) like '%customerapp%' then 'Referral'
-							when lower(utmsource) like '%sms%' then 'SMS'
-							else null end
-						else campaign_bucket end as channel_source
+					select *,
+					case
+						when lower(channel_source) like '%discovery%' then 'Discovery'
+						when lower(channel_source) like '%yt%' then 'Youtube'
+						when lower(channel_source) like '%sem%' then 'SEM'
+						when lower(channel_source) like '%gdn%' then 'GDN'
+						when lower(channel_source) like '%facebook%' or lower(channel_source) = 'fb - rq' then 'Facebook'
+						else channel_source end as channel
 
-					from utm_mapped_leads
+					from
+					(
+						select *
+						, case
+							when campaign_bucket is null then
+							case 
+								when lower(trim(utmsource)) in (select distinct affiliate from dm.affiliates_list) then 'Digital Affliate'
+								when lower(utmsource) like '%app_paid%' then 'app_paid'
+								when lower(utmsource) like '%app_unpaid%' then 'app_organic'
+								when lower(utmsource) like '%google%' then 'Google'
+								when lower(utmsource) like '%website%' then 'Website'
+								when lower(utmsource) like '%webite%' then 'Website'
+								when lower(utmsource) like '%customerapp%' then 'Referral'
+								when lower(utmsource) like '%sms%' then 'SMS'
+								else null end
+							else campaign_bucket end as channel_source
+
+						from utm_mapped_leads
+					)
 				)
 			)
 		)
